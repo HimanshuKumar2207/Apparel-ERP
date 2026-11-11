@@ -19,7 +19,7 @@ import auditRoutes from './modules/audit/audit.routes.js';
 
 const router = Router();
 
-router.get('/', (_req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
+router.get('/', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 router.use('/auth', authRoutes);
 
 // Everything below requires a valid session
