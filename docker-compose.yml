@@ -1,0 +1,41 @@
+# Production-style stack: MongoDB (private) + API + web (nginx).
+# 1) cp .env.example .env   2) fill every value   3) docker compose up -d --build
+# 4) docker compose exec server npm run seed      (creates the 3 Super Admins, prints one-time passwords)
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:?set MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?set MONGO_PASSWORD}
+    volumes: [mongo_data:/data/db]
+    networks: [internal]          # no published ports: only the API can reach the database
+
+  server:
+    build: ./server
+    restart: unless-stopped
+    depends_on: [mongo]
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      TRUST_PROXY: 1
+      MONGO_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/apparel_erp?authSource=admin
+      CLIENT_ORIGINS: ${CLIENT_ORIGIN:?set CLIENT_ORIGIN, e.g. https://erp.yourcompany.com}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?set JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?set JWT_REFRESH_SECRET}
+      FIELD_ENCRYPTION_KEY: ${FIELD_ENCRYPTION_KEY:?set FIELD_ENCRYPTION_KEY}
+      REQUIRE_2FA_SUPER_ADMIN: ${REQUIRE_2FA_SUPER_ADMIN:-true}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+    networks: [internal]
+
+  web:
+    build: ./client
+    restart: unless-stopped
+    depends_on: [server]
+    ports: ["8080:80"]            # put HTTPS (Caddy / Cloudflare / load balancer) in front of this port
+    networks: [internal]
+
+volumes:
+  mongo_data:
+networks:
+  internal:

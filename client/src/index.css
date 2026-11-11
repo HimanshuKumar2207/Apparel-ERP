@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 246 247 251;
+  --surface: 255 255 255;
+  --surface-2: 243 245 250;
+  --line: 227 231 241;
+  --ink: 17 24 39;
+  --muted: 100 112 133;
+  --brand: 79 70 229;
+  --brand-soft: 237 238 254;
+  --brand-fg: 255 255 255;
+  --accent: 13 148 136;
+  --success: 22 163 74;
+  --warn: 217 119 6;
+  --danger: 220 38 38;
+  --info: 2 132 199;
+  color-scheme: light;
+}
+.dark {
+  --bg: 11 14 22;
+  --surface: 20 24 36;
+  --surface-2: 27 32 47;
+  --line: 40 47 66;
+  --ink: 236 239 247;
+  --muted: 150 160 182;
+  --brand: 129 140 248;
+  --brand-soft: 35 38 74;
+  --brand-fg: 14 16 30;
+  --accent: 45 212 191;
+  --success: 74 222 128;
+  --warn: 251 191 36;
+  --danger: 248 113 113;
+  --info: 56 189 248;
+  color-scheme: dark;
+}
+
+@layer base {
+  html { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+  body { @apply bg-bg text-ink antialiased; font-feature-settings: 'cv11', 'ss01'; }
+  * { @apply border-line; }
+  ::selection { background: rgb(var(--brand) / 0.25); }
+  input[type='number']::-webkit-inner-spin-button, input[type='number']::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type='number'] { -moz-appearance: textfield; }
+}
+
+@layer components {
+  .input {
+    @apply w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm text-ink placeholder:text-muted/70 shadow-sm outline-none transition
+           focus:border-brand focus:ring-4 focus:ring-brand/15 disabled:cursor-not-allowed disabled:bg-surface2 disabled:opacity-70;
+  }
+  .input-error { @apply border-danger focus:border-danger focus:ring-danger/15; }
+  .scroll-thin { scrollbar-width: thin; scrollbar-color: rgb(var(--line)) transparent; }
+}
+
+.skeleton { position: relative; overflow: hidden; background: rgb(var(--surface-2)); border-radius: 0.5rem; }
+.skeleton::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(var(--line) / 0.7), transparent); animation: shimmer 1.4s infinite; }
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+
+.recharts-text { fill: rgb(var(--muted)); font-size: 11px; }
+.recharts-cartesian-grid line { stroke: rgb(var(--line)); }
+
+/* Printing an invoice: show only the invoice, on white */
+@media print {
+  body * { visibility: hidden !important; }
+  .print-area, .print-area * { visibility: visible !important; }
+  .print-area { position: fixed; inset: 0; z-index: 99999; overflow: visible; padding: 24px; background: #fff !important; color: #000 !important; border: none !important; border-radius: 0 !important; }
+  .print-area * { color: #000 !important; }
+  .no-print { display: none !important; }
+}
